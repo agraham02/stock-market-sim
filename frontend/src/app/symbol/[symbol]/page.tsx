@@ -4,6 +4,7 @@ import { CandlestickChart as CandlestickChartIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 
 import { CandlestickChart } from "@/components/candlestick-chart";
+import { LessonPrompt } from "@/components/lesson-prompt";
 import { FadeIn } from "@/components/motion/fade-in";
 import { OptionsChain } from "@/components/options-chain";
 import { PatternList } from "@/components/pattern-list";
@@ -23,6 +24,10 @@ export default function SymbolPage() {
         <p className="text-muted-foreground text-sm mt-1">
           Daily candlesticks with recognized patterns explained in plain language.
         </p>
+      </FadeIn>
+
+      <FadeIn delay={0.02}>
+        <LessonPrompt maxOrder={4} />
       </FadeIn>
 
       {isError && (

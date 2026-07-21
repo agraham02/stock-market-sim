@@ -3,6 +3,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.models.journal_entry import Catalyst, Direction, JournalEntry
 from app.models.position import OptionType, Position, PositionStatus
 from app.models.trade import Trade, TradeAction
 from app.services import market_data, options
@@ -23,6 +24,10 @@ def contract_multiplier(option_type: OptionType) -> int:
 
 def _is_short_dated(expiration: date | None) -> bool:
     return expiration is not None and (expiration - date.today()).days <= 2
+
+
+def _underlying_price(db: Session, symbol: str) -> float:
+    return market_data.get_ohlc(db, symbol, days=5)[-1]["close"]
 
 
 def _determine_fill_price(
@@ -52,12 +57,50 @@ def _determine_fill_price(
 def _current_quote(db: Session, symbol: str, option_type: OptionType, strike: float | None, expiration: date | None) -> tuple[float, float]:
     """Return (bid, ask) for the position's underlying or option contract."""
     if option_type == OptionType.none:
-        candles = market_data.get_ohlc(db, symbol, days=5)
-        last_close = candles[-1]["close"]
+        last_close = _underlying_price(db, symbol)
         return last_close, last_close
 
     contract = options.get_contract_quote(symbol, option_type.value, strike, expiration.isoformat())
     return contract["bid"], contract["ask"]
+
+
+def _grade_and_record_journal(db: Session, position: Position, exit_option_price: float) -> None:
+    """Grade the Decision Framework thesis recorded when the position was opened.
+
+    Polarity: True always means "this dimension went the way the trader wanted."
+    grade_iv_crush is left null when the thesis itself was wrong, since a loss
+    can't be attributed to IV crush if direction/magnitude weren't even right.
+    """
+    open_trade = (
+        db.query(Trade)
+        .filter(Trade.position_id == position.id, Trade.action == TradeAction.open)
+        .order_by(Trade.timestamp.asc())
+        .first()
+    )
+    if open_trade is None or open_trade.journal_entry is None:
+        return
+
+    journal = open_trade.journal_entry
+    underlying_price_at_exit = _underlying_price(db, position.symbol)
+    actual_move_pct = (
+        underlying_price_at_exit - journal.underlying_price_at_entry
+    ) / journal.underlying_price_at_entry
+
+    grade_direction = (journal.direction == Direction.up and actual_move_pct > 0) or (
+        journal.direction == Direction.down and actual_move_pct < 0
+    )
+    grade_magnitude = abs(actual_move_pct) >= journal.expected_magnitude
+    grade_timing = grade_direction and grade_magnitude
+
+    grade_iv_crush = None
+    if grade_timing and position.option_type != OptionType.none:
+        grade_iv_crush = (exit_option_price - position.entry_price) > 0
+
+    journal.underlying_price_at_exit = underlying_price_at_exit
+    journal.grade_direction = grade_direction
+    journal.grade_magnitude = grade_magnitude
+    journal.grade_timing = grade_timing
+    journal.grade_iv_crush = grade_iv_crush
 
 
 def open_position(
@@ -68,6 +111,11 @@ def open_position(
     strike: float | None,
     expiration: date | None,
     quantity: int,
+    catalyst: Catalyst,
+    direction: Direction,
+    expected_magnitude: float,
+    timeframe_rationale: str,
+    confidence: int,
     order_type: str = "market",
     limit_price: float | None = None,
 ) -> tuple[Position, str | None]:
@@ -79,7 +127,13 @@ def open_position(
     symbol = symbol.upper()
     multiplier = contract_multiplier(option_type)
 
-    bid, ask = _current_quote(db, symbol, option_type, strike, expiration)
+    iv_at_entry = None
+    if option_type == OptionType.none:
+        bid, ask = _current_quote(db, symbol, option_type, strike, expiration)
+    else:
+        contract = options.get_contract_quote(symbol, option_type.value, strike, expiration.isoformat())
+        bid, ask, iv_at_entry = contract["bid"], contract["ask"], contract["implied_volatility"]
+
     fill_price = _determine_fill_price(order_type, limit_price, bid, ask, side="buy")
     cost = fill_price * quantity * multiplier
 
@@ -91,6 +145,7 @@ def open_position(
 
     portfolio_value_before = portfolio.cash_balance
     portfolio.cash_balance -= cost
+    underlying_price_at_entry = _underlying_price(db, symbol)
 
     position = Position(
         portfolio_id=portfolio.id,
@@ -104,7 +159,23 @@ def open_position(
     )
     db.add(position)
     db.flush()
-    db.add(Trade(position_id=position.id, action=TradeAction.open, fill_price=fill_price))
+
+    open_trade = Trade(position_id=position.id, action=TradeAction.open, fill_price=fill_price)
+    db.add(open_trade)
+    db.flush()
+
+    db.add(
+        JournalEntry(
+            trade_id=open_trade.id,
+            catalyst=catalyst,
+            direction=direction,
+            expected_magnitude=expected_magnitude,
+            iv_at_entry=iv_at_entry,
+            timeframe_rationale=timeframe_rationale,
+            confidence=confidence,
+            underlying_price_at_entry=underlying_price_at_entry,
+        )
+    )
     db.commit()
     db.refresh(position)
 
@@ -140,6 +211,10 @@ def close_position(
 
     position.status = PositionStatus.closed
     db.add(Trade(position_id=position.id, action=TradeAction.close, fill_price=fill_price))
+    db.flush()
+
+    _grade_and_record_journal(db, position, exit_option_price=fill_price)
+
     db.commit()
     db.refresh(position)
     return position
@@ -162,8 +237,7 @@ def resolve_expired_positions(db: Session) -> None:
 
     portfolio = get_or_create_portfolio(db)
     for position in expired:
-        candles = market_data.get_ohlc(db, position.symbol, days=5)
-        underlying_price = candles[-1]["close"]
+        underlying_price = _underlying_price(db, position.symbol)
 
         if position.option_type == OptionType.call:
             intrinsic = max(0.0, underlying_price - position.strike)
@@ -175,6 +249,9 @@ def resolve_expired_positions(db: Session) -> None:
 
         position.status = PositionStatus.expired
         db.add(Trade(position_id=position.id, action=TradeAction.close, fill_price=intrinsic))
+        db.flush()
+
+        _grade_and_record_journal(db, position, exit_option_price=intrinsic)
 
     db.commit()
 

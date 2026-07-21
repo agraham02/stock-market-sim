@@ -22,6 +22,7 @@ export function useOpenTrade() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["positions"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["journal"] });
     },
   });
 }
@@ -45,6 +46,7 @@ export function useCloseTrade() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["positions"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["journal"] });
     },
   });
 }

@@ -2,6 +2,7 @@
 
 import { Briefcase, PiggyBank, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
+import { LessonPrompt } from "@/components/lesson-prompt";
 import { FadeIn } from "@/components/motion/fade-in";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger-group";
 import { PositionsTable } from "@/components/positions-table";
@@ -99,6 +100,10 @@ export default function DashboardPage() {
           </Card>
         </StaggerItem>
       </StaggerGroup>
+
+      <FadeIn delay={0.075}>
+        <LessonPrompt maxOrder={9} />
+      </FadeIn>
 
       <FadeIn delay={0.1}>
         <Card>

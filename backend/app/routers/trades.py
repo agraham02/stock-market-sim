@@ -19,6 +19,11 @@ def open_trade(request: OpenTradeRequest, db: Session = Depends(get_db)) -> Open
             strike=request.strike,
             expiration=request.expiration,
             quantity=request.quantity,
+            catalyst=request.catalyst,
+            direction=request.direction,
+            expected_magnitude=request.expected_magnitude,
+            timeframe_rationale=request.timeframe_rationale,
+            confidence=request.confidence,
             order_type=request.order_type,
             limit_price=request.limit_price,
         )

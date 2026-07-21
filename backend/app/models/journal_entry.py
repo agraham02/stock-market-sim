@@ -33,8 +33,10 @@ class JournalEntry(Base):
     iv_at_entry: Mapped[float | None] = mapped_column(Numeric(6, 4, asdecimal=False), nullable=True)
     timeframe_rationale: Mapped[str] = mapped_column(Text, nullable=False)
     confidence: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
+    underlying_price_at_entry: Mapped[float] = mapped_column(Numeric(12, 4, asdecimal=False), nullable=False)
 
     # Grading (filled in after close/expiration)
+    underlying_price_at_exit: Mapped[float | None] = mapped_column(Numeric(12, 4, asdecimal=False), nullable=True)
     grade_direction: Mapped[bool | None] = mapped_column(nullable=True)
     grade_magnitude: Mapped[bool | None] = mapped_column(nullable=True)
     grade_timing: Mapped[bool | None] = mapped_column(nullable=True)

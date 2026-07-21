@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, LayoutDashboard, LineChart } from "lucide-react";
+import { Briefcase, GraduationCap, LayoutDashboard, LineChart, NotebookText } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -16,6 +16,8 @@ const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, match: (p: string) => p === "/" },
   { href: "/symbol/SPY", label: "Symbol View", icon: LineChart, match: (p: string) => p.startsWith("/symbol") },
   { href: "/positions", label: "Positions", icon: Briefcase, match: (p: string) => p.startsWith("/positions") },
+  { href: "/journal", label: "Journal", icon: NotebookText, match: (p: string) => p.startsWith("/journal") },
+  { href: "/learn", label: "Learn", icon: GraduationCap, match: (p: string) => p.startsWith("/learn") },
 ];
 
 export function Nav() {

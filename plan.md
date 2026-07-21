@@ -104,6 +104,7 @@ Built behind a small provider-agnostic interface so switching models is a config
 - Expiration/theta-decay reminders.
 - Side-by-side strategy comparison.
 - Local LLM tutor option (Llama 3.2 3B / Phi-4-mini via Ollama) for fully offline use.
+- **AI Trade Review (on-demand)**: qualitative AI grading of a closed trade, on top of the automatic quantitative grades — see below.
 
 ## The Decision Framework (core mechanic)
 
@@ -132,6 +133,20 @@ The Dashboard's basic P&L/win-rate bullet (Phase 1) shows where you stand *right
 - **Curriculum correlation**: simple before/after signal — e.g. IV-crush grade accuracy in the 10 trades before vs. after completing the IV lesson — to validate the Learn Hub content is actually landing.
 
 All of this is derived from data already captured by the Decision Framework/Journal (M3) and Learn Hub (M4); the only new schema is `PortfolioSnapshot` for the value-over-time chart.
+
+## AI Trade Review (Phase 3)
+
+The Journal's automatic grades (M3) are deliberately mechanical — direction/magnitude/timing/IV-crush, computed from price data alone. They can't tell you *why* a thesis was right or wrong in a way that teaches something for next time (e.g. "you called it earnings-driven, but the actual move started two days before the print — that was sector rotation, not your catalyst"). This feature adds an on-demand, qualitative second pass from the same AI Tutor model (M5), specifically requested per trade rather than run automatically — consistent with the existing AI Tutor cost-control principle of only invoking the model for genuinely open-ended questions.
+
+- **Trigger**: a "Ask AI to review this trade" action on a closed Journal entry. Never automatic/background — every call is a deliberate, user-initiated spend.
+- **Context assembled server-side** from data already on hand plus one fresh pull:
+  - The full JournalEntry (catalyst, direction, expected magnitude, IV at entry, rationale, confidence, the four quantitative grades).
+  - The Position/Trade record (symbol, strike/expiration, entry/exit fills, realized P&L).
+  - The underlying's OHLC across the trade's actual window (already cached via `QuoteCache`/`market_data`), so the model sees the real price path, not just entry/exit points.
+  - Candlestick patterns detected in that window (reuse the existing `pandas-ta-classic` pipeline from M1).
+  - Fresh news/catalyst context for that symbol and date range, pulled from Finnhub (and Alpha Vantage sentiment if the rate-limited quota allows) — so the model can check the stated catalyst against what the news actually shows, not just take the user's word for it.
+- **Output**: a written qualitative review — where the stated thesis matches or diverges from what actually happened, and (when a knowledge gap is evident) a pointer back to the relevant Learn Hub lesson. Distinct from re-deriving the four boolean grades, which stay purely mechanical.
+- **Storage**: persisted as a `ChatMessage` (`context_type="trade"`, `context_id` = the trade's id) — no new table, reusing the schema already defined for the AI Tutor.
 
 ## Built-in Curriculum (Learn Hub)
 
@@ -198,6 +213,8 @@ Short (5-10 min) lessons, surfaced contextually the first time relevant:
 - **M6 — News/Catalyst Panel:** Finnhub integration, on-demand Alpha Vantage sentiment pull, catalyst display on Symbol view.
 - **Phase 2 milestones** (Greeks/IV, multi-leg, 0-2 DTE view, Progress & Analytics screen) once M0-M6 are solid and actually being used.
   - **Progress & Analytics** specifically: `PortfolioSnapshot` table + snapshot-on-trade-event hook, rolling grading-accuracy charts per Decision Framework dimension, confidence calibration view, performance breakdowns by catalyst/option-type/DTE, curriculum-correlation surfacing.
+- **Phase 3 milestones** (scenario replay, theta-decay reminders, strategy comparison, local LLM, AI Trade Review) once Phase 2 is solid.
+  - **AI Trade Review** specifically: server-side context assembly (JournalEntry + Trade + windowed OHLC/patterns + fresh Finnhub/Alpha Vantage pull), a review prompt template separate from the general tutor prompt, "Ask AI to review" action on closed Journal entries, persisted as a `ChatMessage` with `context_type="trade"`.
 
 ## Resources (curated)
 

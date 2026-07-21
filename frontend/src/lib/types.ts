@@ -35,6 +35,8 @@ export interface SymbolChart {
 export type OptionType = "call" | "put" | "none";
 export type PositionStatus = "open" | "closed" | "expired";
 export type OrderType = "market" | "limit";
+export type Catalyst = "earnings" | "news" | "technical_setup" | "momentum" | "macro_event" | "none";
+export type Direction = "up" | "down";
 
 export interface OptionContract {
   strike: number;
@@ -77,9 +79,50 @@ export interface OpenTradeRequest {
   quantity: number;
   order_type: OrderType;
   limit_price?: number | null;
+  catalyst: Catalyst;
+  direction: Direction;
+  expected_magnitude: number;
+  timeframe_rationale: string;
+  confidence: number;
 }
 
 export interface OpenTradeResponse {
   position: Position;
   warning: string | null;
+}
+
+export interface JournalEntry {
+  id: number;
+  trade_id: number;
+  position_id: number;
+  symbol: string;
+  option_type: OptionType;
+  strike: number | null;
+  expiration: string | null;
+  status: PositionStatus;
+  catalyst: Catalyst;
+  direction: Direction;
+  expected_magnitude: number;
+  iv_at_entry: number | null;
+  timeframe_rationale: string;
+  confidence: number;
+  underlying_price_at_entry: number;
+  created_at: string;
+  underlying_price_at_exit: number | null;
+  grade_direction: boolean | null;
+  grade_magnitude: boolean | null;
+  grade_timing: boolean | null;
+  grade_iv_crush: boolean | null;
+  notes: string | null;
+}
+
+export interface Lesson {
+  id: number;
+  title: string;
+  order: number;
+  completed_at: string | null;
+}
+
+export interface LessonDetail extends Lesson {
+  content_md: string;
 }

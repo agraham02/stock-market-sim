@@ -23,6 +23,7 @@ interface SelectedContract {
   optionType: OptionType;
   bid: number;
   ask: number;
+  impliedVolatility: number | null;
 }
 
 export function OptionsChain({ symbol }: { symbol: string }) {
@@ -97,12 +98,16 @@ export function OptionsChain({ symbol }: { symbol: string }) {
                   <TableRow key={strike}>
                     <ContractCells
                       contract={call}
-                      onBuy={(bid, ask) => setSelected({ strike, optionType: "call", bid, ask })}
+                      onBuy={(bid, ask, iv) =>
+                        setSelected({ strike, optionType: "call", bid, ask, impliedVolatility: iv })
+                      }
                     />
                     <TableCell className="text-center font-medium">{strike}</TableCell>
                     <ContractCells
                       contract={put}
-                      onBuy={(bid, ask) => setSelected({ strike, optionType: "put", bid, ask })}
+                      onBuy={(bid, ask, iv) =>
+                        setSelected({ strike, optionType: "put", bid, ask, impliedVolatility: iv })
+                      }
                     />
                   </TableRow>
                 );
@@ -122,6 +127,7 @@ export function OptionsChain({ symbol }: { symbol: string }) {
           optionType={selected.optionType}
           bid={selected.bid}
           ask={selected.ask}
+          impliedVolatility={selected.impliedVolatility}
         />
       )}
     </Card>
@@ -133,7 +139,7 @@ function ContractCells({
   onBuy,
 }: {
   contract: OptionContract | undefined;
-  onBuy: (bid: number, ask: number) => void;
+  onBuy: (bid: number, ask: number, impliedVolatility: number | null) => void;
 }) {
   if (!contract) {
     return (
@@ -145,15 +151,17 @@ function ContractCells({
     );
   }
 
+  const buy = () => onBuy(contract.bid, contract.ask, contract.implied_volatility);
+
   return (
     <>
       <TableCell className={cn(contract.in_the_money && "text-foreground font-medium")}>
-        <Button variant="ghost" size="sm" className="h-7" onClick={() => onBuy(contract.bid, contract.ask)}>
+        <Button variant="ghost" size="sm" className="h-7" onClick={buy}>
           {contract.bid.toFixed(2)}
         </Button>
       </TableCell>
       <TableCell className={cn(contract.in_the_money && "text-foreground font-medium")}>
-        <Button variant="ghost" size="sm" className="h-7" onClick={() => onBuy(contract.bid, contract.ask)}>
+        <Button variant="ghost" size="sm" className="h-7" onClick={buy}>
           {contract.ask.toFixed(2)}
         </Button>
       </TableCell>
