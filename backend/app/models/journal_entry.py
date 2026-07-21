@@ -29,8 +29,8 @@ class JournalEntry(Base):
     # Decision Framework (filled in before the trade is placed)
     catalyst: Mapped[Catalyst] = mapped_column(Enum(Catalyst, name="catalyst"), nullable=False)
     direction: Mapped[Direction] = mapped_column(Enum(Direction, name="direction"), nullable=False)
-    expected_magnitude: Mapped[float] = mapped_column(Numeric(6, 4), nullable=False)
-    iv_at_entry: Mapped[float | None] = mapped_column(Numeric(6, 4), nullable=True)
+    expected_magnitude: Mapped[float] = mapped_column(Numeric(6, 4, asdecimal=False), nullable=False)
+    iv_at_entry: Mapped[float | None] = mapped_column(Numeric(6, 4, asdecimal=False), nullable=True)
     timeframe_rationale: Mapped[str] = mapped_column(Text, nullable=False)
     confidence: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
 

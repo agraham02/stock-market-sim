@@ -1,3 +1,5 @@
+import { Sparkles } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PatternHit } from "@/lib/types";
@@ -8,7 +10,9 @@ export function PatternList({ patterns }: { patterns: PatternHit[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Detected Candlestick Patterns</CardTitle>
+        <CardTitle className="flex items-center gap-1.5">
+          <Sparkles className="size-4" /> Detected Candlestick Patterns
+        </CardTitle>
         <CardDescription>
           Most recent first — hover the matching marker on the chart to see where it fired.
         </CardDescription>

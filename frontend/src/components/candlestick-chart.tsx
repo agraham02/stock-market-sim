@@ -10,9 +10,15 @@ import {
   type SeriesMarker,
   type Time,
 } from "lightweight-charts";
+import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 
 import type { Candle, PatternHit } from "@/lib/types";
+
+const THEME_COLORS = {
+  dark: { text: "#a1a1aa", grid: "#27272a" },
+  light: { text: "#71717a", grid: "#e4e4e7" },
+};
 
 interface CandlestickChartProps {
   candles: Candle[];
@@ -23,23 +29,25 @@ export function CandlestickChart({ candles, patterns }: CandlestickChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    const colors = THEME_COLORS[resolvedTheme === "light" ? "light" : "dark"];
     const chart = createChart(container, {
       autoSize: true,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#a1a1aa",
+        textColor: colors.text,
       },
       grid: {
-        vertLines: { color: "#27272a" },
-        horzLines: { color: "#27272a" },
+        vertLines: { color: colors.grid },
+        horzLines: { color: colors.grid },
       },
-      timeScale: { borderColor: "#27272a" },
-      rightPriceScale: { borderColor: "#27272a" },
+      timeScale: { borderColor: colors.grid },
+      rightPriceScale: { borderColor: colors.grid },
     });
 
     const series = chart.addSeries(CandlestickSeries, {
@@ -58,7 +66,21 @@ export function CandlestickChart({ candles, patterns }: CandlestickChartProps) {
       chartRef.current = null;
       seriesRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const colors = THEME_COLORS[resolvedTheme === "light" ? "light" : "dark"];
+    chartRef.current?.applyOptions({
+      layout: { textColor: colors.text },
+      grid: {
+        vertLines: { color: colors.grid },
+        horzLines: { color: colors.grid },
+      },
+      timeScale: { borderColor: colors.grid },
+      rightPriceScale: { borderColor: colors.grid },
+    });
+  }, [resolvedTheme]);
 
   useEffect(() => {
     const series = seriesRef.current;

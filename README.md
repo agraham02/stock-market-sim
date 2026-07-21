@@ -17,7 +17,10 @@ docker compose up -d postgres
 # 2. Backend
 cd backend
 python -m venv .venv
-.venv/Scripts/activate        # macOS/Linux: source .venv/bin/activate
+source .venv/Scripts/activate  # Git Bash/MSYS2 on Windows
+# .venv\Scripts\Activate.ps1   # PowerShell
+# .venv\Scripts\activate.bat   # cmd.exe
+# source .venv/bin/activate    # macOS/Linux
 pip install -e ".[dev]"
 cp .env.example .env          # fill in Tradier/Finnhub/AI keys as you get them
 alembic upgrade head
@@ -31,8 +34,8 @@ cp .env.local.example .env.local
 ## Running
 
 ```bash
-# Terminal 1
-cd backend && .venv/Scripts/activate && uvicorn app.main:app --reload --port 8000
+# Terminal 1 (Git Bash/MSYS2 — use source, not a bare path, or the venv won't actually activate)
+cd backend && source .venv/Scripts/activate && uvicorn app.main:app --reload --port 8000
 
 # Terminal 2
 cd frontend && npm run dev

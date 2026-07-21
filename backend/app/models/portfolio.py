@@ -11,8 +11,8 @@ class Portfolio(Base):
     __tablename__ = "portfolios"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    cash_balance: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False)
-    starting_balance: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False)
+    cash_balance: Mapped[float] = mapped_column(Numeric(14, 2, asdecimal=False), nullable=False)
+    starting_balance: Mapped[float] = mapped_column(Numeric(14, 2, asdecimal=False), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     positions: Mapped[list["Position"]] = relationship(back_populates="portfolio")

@@ -20,7 +20,7 @@ class Trade(Base):
     position_id: Mapped[int] = mapped_column(ForeignKey("positions.id"), nullable=False)
     action: Mapped[TradeAction] = mapped_column(Enum(TradeAction, name="trade_action"), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    fill_price: Mapped[float] = mapped_column(Numeric(12, 4), nullable=False)
+    fill_price: Mapped[float] = mapped_column(Numeric(12, 4, asdecimal=False), nullable=False)
     tradier_order_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     position: Mapped["Position"] = relationship(back_populates="trades")

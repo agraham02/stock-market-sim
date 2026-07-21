@@ -97,6 +97,7 @@ Built behind a small provider-agnostic interface so switching models is a config
 - Multi-leg strategies: covered calls, spreads, iron condors, builder UI.
 - Assignment/exercise simulation refined using Tradier sandbox behavior.
 - Dedicated **short-dated options (0-2 DTE) view**: real-time-feeling gamma/theta visualization so decay/whipsaw risk is visible and felt, safely — directly addressing the friends'-style trading that motivated this project.
+- **Progress & Analytics dashboard**: a dedicated screen answering "am I actually getting better?" — see below.
 
 ### Phase 3 — Stretch
 - Scenario replay against historical data.
@@ -120,6 +121,18 @@ Every simulated trade requires, before submission:
 
 Soft warning when a single trade — especially short-dated — would use more than a configurable threshold (default ~5-10%) of portfolio value, building the position-sizing habit before it's ever real money.
 
+## Progress & Analytics (Phase 2)
+
+The Dashboard's basic P&L/win-rate bullet (Phase 1) shows where you stand *right now*. This is the deeper, dedicated screen for whether the underlying decision-making is actually improving over the 20-30-trade arc the app is designed around — the P&L number alone can't answer that, since a lucky trade on a bad thesis looks identical to a good one in raw dollars.
+
+- **Decision Framework accuracy over time**: rolling accuracy (e.g. trailing 10 trades) charted separately for each graded dimension — direction, magnitude, timing, IV crush — so it's visible *which specific skill* is or isn't improving, rather than one blended win rate hiding the difference between "wrong direction" and "right direction, wrong size."
+- **Confidence calibration**: bucket closed trades by self-rated confidence (1-5) against actual win rate. A flat or inverted line (high confidence, mediocre results) surfaces overconfidence directly — this is the single most useful behavioral signal the Decision Framework's confidence field can produce, and it's invisible without tracking it explicitly.
+- **Performance breakdowns**: win rate and average P&L sliced by catalyst type, option type (call/put), and DTE bucket (0-2 / 3-7 / 8+ days) — e.g. surfacing "profitable on earnings calls, but consistently losing on same-day momentum plays."
+- **Portfolio value over time**: realized + mark-to-market unrealized value charted from periodic snapshots (see `PortfolioSnapshot` below), not reconstructed on the fly from trade replay.
+- **Curriculum correlation**: simple before/after signal — e.g. IV-crush grade accuracy in the 10 trades before vs. after completing the IV lesson — to validate the Learn Hub content is actually landing.
+
+All of this is derived from data already captured by the Decision Framework/Journal (M3) and Learn Hub (M4); the only new schema is `PortfolioSnapshot` for the value-over-time chart.
+
 ## Built-in Curriculum (Learn Hub)
 
 Short (5-10 min) lessons, surfaced contextually the first time relevant:
@@ -142,6 +155,7 @@ Short (5-10 min) lessons, surfaced contextually the first time relevant:
 - Option chain + Decision Framework trade ticket
 - Positions (open positions, live gamma/theta view for short-dated ones)
 - Journal (every trade: thesis, grade, notes, searchable/filterable)
+- Progress (Phase 2: grading-accuracy trends, confidence calibration, performance breakdowns, curriculum correlation)
 
 ## Data Model (draft schema)
 
@@ -152,6 +166,7 @@ Short (5-10 min) lessons, surfaced contextually the first time relevant:
 - **Lesson**: `id`, `title`, `order`, `content_md`, `completed_at`
 - **ChatMessage**: `id`, `role`, `content`, `context_type` (lesson/trade/symbol), `context_id`, `timestamp`
 - **QuoteCache**: `symbol`, `ohlc_json`, `fetched_at` (to minimize API calls against rate limits)
+- **PortfolioSnapshot** (Phase 2): `id`, `portfolio_id`, `timestamp`, `cash_balance`, `open_market_value`, `total_value` (written after every trade event and on a periodic tick, so the Progress screen can chart portfolio value over time without reconstructing history from trade replay)
 
 ## Tech Stack Summary
 
@@ -181,7 +196,8 @@ Short (5-10 min) lessons, surfaced contextually the first time relevant:
 - **M4 — Learn Hub:** curriculum content (9 lessons), contextual triggers, progress tracking.
 - **M5 — AI Tutor:** provider interface, Gemini Flash integration, contextual grounding, chat UI in Learn Hub/Journal/Symbol view.
 - **M6 — News/Catalyst Panel:** Finnhub integration, on-demand Alpha Vantage sentiment pull, catalyst display on Symbol view.
-- **Phase 2 milestones** (Greeks/IV, multi-leg, 0-2 DTE view) once M0-M6 are solid and actually being used.
+- **Phase 2 milestones** (Greeks/IV, multi-leg, 0-2 DTE view, Progress & Analytics screen) once M0-M6 are solid and actually being used.
+  - **Progress & Analytics** specifically: `PortfolioSnapshot` table + snapshot-on-trade-event hook, rolling grading-accuracy charts per Decision Framework dimension, confidence calibration view, performance breakdowns by catalyst/option-type/DTE, curriculum-correlation surfacing.
 
 ## Resources (curated)
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.routers import health, portfolio, symbol
+from app.routers import health, options, portfolio, positions, symbol, trades
 
 settings = get_settings()
 
@@ -19,3 +19,6 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(portfolio.router)
 app.include_router(symbol.router)
+app.include_router(options.router)
+app.include_router(trades.router)
+app.include_router(positions.router)

@@ -29,10 +29,10 @@ class Position(Base):
     option_type: Mapped[OptionType] = mapped_column(
         Enum(OptionType, name="option_type"), default=OptionType.none, nullable=False
     )
-    strike: Mapped[float | None] = mapped_column(Numeric(12, 4), nullable=True)
+    strike: Mapped[float | None] = mapped_column(Numeric(12, 4, asdecimal=False), nullable=True)
     expiration: Mapped[date | None] = mapped_column(Date, nullable=True)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
-    entry_price: Mapped[float] = mapped_column(Numeric(12, 4), nullable=False)
+    entry_price: Mapped[float] = mapped_column(Numeric(12, 4, asdecimal=False), nullable=False)
     status: Mapped[PositionStatus] = mapped_column(
         Enum(PositionStatus, name="position_status"), default=PositionStatus.open, nullable=False
     )

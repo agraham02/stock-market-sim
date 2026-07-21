@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     # Portfolio defaults
     default_starting_balance: float = 100_000.0
 
+    # Risk guardrail: soft-warn when a single trade exceeds this fraction of portfolio value
+    risk_warning_threshold_pct: float = 0.08
+
     # Tradier sandbox
     tradier_api_base: str = "https://sandbox.tradier.com/v1"
     tradier_access_token: str = ""
