@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, Integer, String, Text
+from sqlalchemy import DateTime, Enum, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -28,5 +28,5 @@ class ChatMessage(Base):
     context_type: Mapped[ChatContextType] = mapped_column(
         Enum(ChatContextType, name="chat_context_type"), nullable=False
     )
-    context_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    context_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

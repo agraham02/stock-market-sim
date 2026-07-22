@@ -63,13 +63,15 @@ Standard Black-Scholes implementation for delta/theta/gamma/vega and IV back-out
 
 ## AI Tutor — Concrete Model Choice
 
+**Implemented as of M5.** `gemini-2.5-flash` from the original plan is deprecated for new usage — the shipped default is `gemini-flash-latest` (Google's rolling alias for its current flash-tier model), configurable via `GEMINI_API_KEY`/`AI_TUTOR_PROVIDER` in `backend/.env` without a code change.
+
 | Model | Price (in/out per 1M tokens) | Notes |
 |---|---|---|
-| **Gemini 2.5 Flash** (default) | $0.30 / $2.50 | Cheapest of the hosted options; 1M token context; has built-in web search grounding for current-events questions |
-| **Claude Haiku 4.5** (alternate) | $1.00 / $5.00 | Pricier per-token but you already have Anthropic access; Claude API also supports a server-side web search tool |
+| **Gemini Flash** (`gemini-flash-latest`, default) | Free tier available (rate-limited; exact RPM/RPD caps not published as of this writing) — paid tier otherwise cheapest of the hosted options | 1M token context; has built-in web search grounding for current-events questions. Confirmed live: current Gemini flash-tier models (2.5/3.5/3.6 Flash) always spend some tokens on internal "thinking" even with `thinking_level: "low"` — budget `max_output_tokens` generously (shipped with 1024) or responses truncate mid-sentence. |
+| **Claude Haiku 4.5** (alternate, implemented) | $1.00 / $5.00 | Pricier per-token but you already have Anthropic access; Claude API also supports a server-side web search tool |
 | **Local via Ollama** (Phase 3) | Free | Recommended models for laptop-class hardware: **Llama 3.2 3B** (best beginner, ~4GB RAM), **Phi-4-mini 3.8B** (best reasoning at low RAM, ~2.5GB), or **Gemma 3 2B** (fastest on CPU). Fully offline, no API cost, lower quality ceiling |
 
-Built behind a small provider-agnostic interface so switching models is a config change. Start with Gemini Flash as default given cost; Haiku as a one-line swap since you already have access; local model added once the core loop is proven and cost/offline use becomes a real priority.
+Built behind a small provider-agnostic interface (`app/services/ai_tutor/`) so switching models is a config change — both Gemini and Anthropic providers are implemented and working. Local model remains a Phase 3 addition once cost/offline use becomes a real priority (unlikely given the free tier above).
 
 **Grounding:** tutor calls are injected with context automatically — current lesson, the specific trade/thesis/grade being discussed, or the candlestick pattern on screen — so answers are specific, not generic.
 
@@ -105,6 +107,14 @@ Built behind a small provider-agnostic interface so switching models is a config
 - Side-by-side strategy comparison.
 - Local LLM tutor option (Llama 3.2 3B / Phi-4-mini via Ollama) for fully offline use.
 - **AI Trade Review (on-demand)**: qualitative AI grading of a closed trade, on top of the automatic quantitative grades — see below.
+
+### Backlog — Unscheduled Ideas
+
+Raised during development, not yet assigned to a phase/milestone. Revisit once the core M0-M6 loop is solid and actually being used.
+
+- **Interactive onboarding walkthrough**: a first-run guided tour across Dashboard, Symbol view, Options Chain, Positions, Journal, and Learn Hub, explaining what each screen/section is for (e.g. what an options chain actually shows) before the user is dropped into it cold. This is UI orientation, distinct from the Learn Hub's lesson content, which teaches the underlying trading concepts.
+- **Learn Hub quizzes & interactive scenarios**: extend the 9 existing lessons with comprehension quizzes and "X happens — what would you do?" branching scenarios, so the curriculum tests understanding instead of only presenting it.
+- **Charting depth**: revisit whether `lightweight-charts` still fits once Phase 2 charting needs (multi-leg payoff diagrams, Greeks overlays, 0-2 DTE gamma/theta visualization) are in scope, or whether a different library/approach is warranted for those specific views. It remains a good fit for the base candlestick view.
 
 ## The Decision Framework (core mechanic)
 
@@ -166,7 +176,7 @@ Short (5-10 min) lessons, surfaced contextually the first time relevant:
 
 - Dashboard (portfolio value, P&L history, open positions, next lesson)
 - Learn Hub (curriculum, progress, resource library, tutor chat entry point)
-- Symbol view (candlestick chart + pattern callouts + news/catalyst feed)
+- Symbol view (candlestick chart + pattern callouts, hover a detected pattern to highlight where it fired on the chart + news/catalyst feed)
 - Option chain + Decision Framework trade ticket
 - Positions (open positions, live gamma/theta view for short-dated ones)
 - Journal (every trade: thesis, grade, notes, searchable/filterable)
@@ -192,7 +202,9 @@ Short (5-10 min) lessons, surfaced contextually the first time relevant:
   - TanStack Query for data fetching/caching/polling against the backend
   - React Hook Form + Zod for the Decision Framework trade ticket (shadcn form primitives already build on these)
   - Zustand for lightweight client state (active symbol/portfolio, chat panel)
+  - Nav search bar remembers recent symbol searches locally (`localStorage`, last 5)
   - next-themes for dark/light mode; date-fns for expiration/date math
+  - shadcn `message-scroller` + `message` components for the AI Tutor chat panel (proper auto-scroll-that-yields-to-the-reader instead of a hand-rolled scroll effect)
 - **Database:** PostgreSQL, run via Docker Compose (removes the host-install friction that was the only real downside vs. SQLite), accessed via SQLAlchemy + Alembic for migrations. Only Postgres is containerized for now — FastAPI (`uvicorn --reload`) and Next.js (`next dev`) run natively for the fastest edit/reload loop; full app containerization can be added later if/when this becomes hosted.
 - **Market data & paper execution:** Tradier sandbox API, `yfinance` fallback
 - **Pattern detection:** `pandas-ta-classic`

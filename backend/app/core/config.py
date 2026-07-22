@@ -27,8 +27,11 @@ class Settings(BaseSettings):
     # AI tutor
     ai_tutor_provider: str = "gemini"  # gemini | anthropic | ollama
     gemini_api_key: str = ""
+    gemini_model: str = "gemini-flash-latest"
     anthropic_api_key: str = ""
+    anthropic_model: str = "claude-haiku-4-5"
     ollama_base_url: str = "http://localhost:11434"
+    tutor_max_output_tokens: int = 1024
 
     # CORS
     frontend_origin: str = "http://localhost:3000"

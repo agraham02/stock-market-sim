@@ -4,7 +4,7 @@ import { Briefcase, GraduationCap, LayoutDashboard, LineChart, NotebookText } fr
 import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,19 +20,53 @@ const links = [
   { href: "/learn", label: "Learn", icon: GraduationCap, match: (p: string) => p.startsWith("/learn") },
 ];
 
+const RECENT_SEARCHES_KEY = "recent-symbol-searches";
+const MAX_RECENT_SEARCHES = 5;
+
+function loadRecentSearches(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(RECENT_SEARCHES_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const setActiveSymbol = useAppStore((s) => s.setActiveSymbol);
   const [query, setQuery] = useState("");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [showRecent, setShowRecent] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setRecentSearches(loadRecentSearches());
+  }, []);
+
+  function rememberSearch(symbol: string) {
+    setRecentSearches((prev) => {
+      const next = [symbol, ...prev.filter((s) => s !== symbol)].slice(0, MAX_RECENT_SEARCHES);
+      window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  function goToSymbol(symbol: string) {
+    setActiveSymbol(symbol);
+    router.push(`/symbol/${symbol}`);
+    rememberSearch(symbol);
+    setQuery("");
+    setShowRecent(false);
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     const symbol = query.trim().toUpperCase();
     if (!symbol) return;
-    setActiveSymbol(symbol);
-    router.push(`/symbol/${symbol}`);
-    setQuery("");
+    goToSymbol(symbol);
   }
 
   return (
@@ -65,12 +99,33 @@ export function Nav() {
         })}
       </div>
       <form onSubmit={handleSearch} className="ml-auto flex items-center gap-2">
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Symbol (e.g. AAPL)"
-          className="h-8 w-40"
-        />
+        <div ref={searchContainerRef} className="relative">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setShowRecent(true)}
+            onBlur={() => setShowRecent(false)}
+            placeholder="Symbol (e.g. AAPL)"
+            className="h-8 w-40"
+          />
+          {showRecent && recentSearches.length > 0 && (
+            <div className="absolute top-full mt-1 w-full z-50 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 p-1">
+              <p className="px-2 py-1 text-xs text-muted-foreground">Recent</p>
+              {recentSearches.map((symbol) => (
+                <button
+                  key={symbol}
+                  type="button"
+                  // fires before the input's onBlur closes the dropdown
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => goToSymbol(symbol)}
+                  className="w-full text-left px-2 py-1 text-sm rounded-md hover:bg-muted"
+                >
+                  {symbol}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <Button type="submit" size="sm" variant="secondary">
           Go
         </Button>

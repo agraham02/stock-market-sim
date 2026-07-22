@@ -2,9 +2,16 @@ import { Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { PatternHit } from "@/lib/types";
 
-export function PatternList({ patterns }: { patterns: PatternHit[] }) {
+interface PatternListProps {
+  patterns: PatternHit[];
+  hoveredTime?: string | null;
+  onHoverChange?: (time: string | null) => void;
+}
+
+export function PatternList({ patterns, hoveredTime, onHoverChange }: PatternListProps) {
   const sorted = [...patterns].reverse();
 
   return (
@@ -14,7 +21,7 @@ export function PatternList({ patterns }: { patterns: PatternHit[] }) {
           <Sparkles className="size-4" /> Detected Candlestick Patterns
         </CardTitle>
         <CardDescription>
-          Most recent first — hover the matching marker on the chart to see where it fired.
+          Most recent first — hover an entry to see where it fired on the chart.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 max-h-105 overflow-y-auto">
@@ -22,7 +29,15 @@ export function PatternList({ patterns }: { patterns: PatternHit[] }) {
           <p className="text-sm text-muted-foreground">No recognizable patterns in this window.</p>
         )}
         {sorted.map((hit) => (
-          <div key={hit.time} className="flex flex-col gap-2 border-b pb-3 last:border-b-0 last:pb-0">
+          <div
+            key={hit.time}
+            onMouseEnter={() => onHoverChange?.(hit.time)}
+            onMouseLeave={() => onHoverChange?.(null)}
+            className={cn(
+              "flex flex-col gap-2 border-b pb-3 last:border-b-0 last:pb-0 -mx-2 px-2 rounded-md transition-colors",
+              hoveredTime === hit.time && "bg-muted"
+            )}
+          >
             <span className="text-xs text-muted-foreground">{hit.time}</span>
             {hit.patterns.map((pattern) => (
               <div key={pattern.name} className="flex flex-col gap-1">

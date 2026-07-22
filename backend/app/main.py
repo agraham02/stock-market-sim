@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.db import SessionLocal
-from app.routers import health, journal, lessons, options, portfolio, positions, symbol, trades
+from app.routers import health, journal, lessons, options, portfolio, positions, symbol, trades, tutor
 from app.seed import seed_lessons
 
 settings = get_settings()
@@ -39,3 +39,4 @@ app.include_router(trades.router)
 app.include_router(positions.router)
 app.include_router(journal.router)
 app.include_router(lessons.router)
+app.include_router(tutor.router)

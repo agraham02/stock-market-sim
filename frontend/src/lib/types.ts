@@ -126,3 +126,19 @@ export interface Lesson {
 export interface LessonDetail extends Lesson {
   content_md: string;
 }
+
+export type ChatContextType = "lesson" | "trade" | "symbol";
+export type ChatRole = "user" | "assistant";
+
+export interface TutorChatMessage {
+  id: number;
+  role: ChatRole;
+  content: string;
+  context_type: ChatContextType;
+  context_id: string | null;
+  timestamp: string;
+}
+
+export interface TutorChatResponse {
+  messages: TutorChatMessage[];
+}

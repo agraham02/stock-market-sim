@@ -7,6 +7,7 @@ import {
   createSeriesMarkers,
   type IChartApi,
   type ISeriesApi,
+  type ISeriesMarkersPluginApi,
   type SeriesMarker,
   type Time,
 } from "lightweight-charts";
@@ -23,12 +24,28 @@ const THEME_COLORS = {
 interface CandlestickChartProps {
   candles: Candle[];
   patterns: PatternHit[];
+  highlightedTime?: string | null;
 }
 
-export function CandlestickChart({ candles, patterns }: CandlestickChartProps) {
+function buildMarkers(patterns: PatternHit[], highlightedTime?: string | null): SeriesMarker<Time>[] {
+  return patterns.map((hit) => {
+    const bullish = hit.patterns.some((p) => p.direction === "bullish");
+    const highlighted = hit.time === highlightedTime;
+    return {
+      time: hit.time as Time,
+      position: bullish ? "belowBar" : "aboveBar",
+      color: highlighted ? "#3b82f6" : bullish ? "#22c55e" : "#ef4444",
+      shape: bullish ? "arrowUp" : "arrowDown",
+      size: highlighted ? 2 : 1,
+    };
+  });
+}
+
+export function CandlestickChart({ candles, patterns, highlightedTime }: CandlestickChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const markersApiRef = useRef<ISeriesMarkersPluginApi<Time> | null>(null);
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
@@ -96,19 +113,27 @@ export function CandlestickChart({ candles, patterns }: CandlestickChartProps) {
       }))
     );
 
-    const markers: SeriesMarker<Time>[] = patterns.map((hit) => {
-      const bullish = hit.patterns.some((p) => p.direction === "bullish");
-      return {
-        time: hit.time as Time,
-        position: bullish ? "belowBar" : "aboveBar",
-        color: bullish ? "#22c55e" : "#ef4444",
-        shape: bullish ? "arrowUp" : "arrowDown",
-      };
-    });
-    createSeriesMarkers(series, markers);
+    markersApiRef.current = createSeriesMarkers(series, buildMarkers(patterns, highlightedTime));
 
     chartRef.current?.timeScale().fitContent();
+    // highlightedTime intentionally excluded — initial load shouldn't refit the view on hover
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [candles, patterns]);
+
+  useEffect(() => {
+    markersApiRef.current?.setMarkers(buildMarkers(patterns, highlightedTime));
+
+    if (!highlightedTime) return;
+    const chart = chartRef.current;
+    if (!chart) return;
+    const idx = candles.findIndex((c) => c.time === highlightedTime);
+    if (idx === -1) return;
+
+    const timeScale = chart.timeScale();
+    const visibleRange = timeScale.getVisibleLogicalRange();
+    const width = visibleRange ? visibleRange.to - visibleRange.from : 30;
+    timeScale.setVisibleLogicalRange({ from: idx - width / 2, to: idx + width / 2 });
+  }, [highlightedTime, patterns, candles]);
 
   return <div ref={containerRef} className="h-105 w-full" />;
 }

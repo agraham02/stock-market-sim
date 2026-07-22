@@ -2,12 +2,14 @@
 
 import { CandlestickChart as CandlestickChartIcon } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 
 import { CandlestickChart } from "@/components/candlestick-chart";
 import { LessonPrompt } from "@/components/lesson-prompt";
 import { FadeIn } from "@/components/motion/fade-in";
 import { OptionsChain } from "@/components/options-chain";
 import { PatternList } from "@/components/pattern-list";
+import { TutorButton } from "@/components/tutor-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSymbolChart } from "@/hooks/use-symbol-chart";
 
@@ -16,14 +18,18 @@ export default function SymbolPage() {
   const symbol = params.symbol.toUpperCase();
 
   const { data, isPending, isError, error } = useSymbolChart(symbol);
+  const [hoveredTime, setHoveredTime] = useState<string | null>(null);
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-8 max-w-6xl mx-auto w-full">
-      <FadeIn>
-        <h1 className="text-2xl font-semibold tracking-tight">{symbol}</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Daily candlesticks with recognized patterns explained in plain language.
-        </p>
+      <FadeIn className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{symbol}</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Daily candlesticks with recognized patterns explained in plain language.
+          </p>
+        </div>
+        <TutorButton contextType="symbol" contextId={symbol} label={`Ask about ${symbol}`} />
       </FadeIn>
 
       <FadeIn delay={0.02}>
@@ -56,10 +62,10 @@ export default function SymbolPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <CandlestickChart candles={data.candles} patterns={data.patterns} />
+              <CandlestickChart candles={data.candles} patterns={data.patterns} highlightedTime={hoveredTime} />
             </CardContent>
           </Card>
-          <PatternList patterns={data.patterns} />
+          <PatternList patterns={data.patterns} hoveredTime={hoveredTime} onHoverChange={setHoveredTime} />
         </FadeIn>
       )}
 

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { TutorButton } from "@/components/tutor-button";
 import type { JournalEntry } from "@/lib/types";
 
 function GradeBadge({ label, value }: { label: string; value: boolean | null }) {
@@ -56,9 +57,16 @@ export function JournalTable({ entries }: { entries: JournalEntry[] }) {
                   </span>
                   <Badge variant="secondary">{CATALYST_LABELS[entry.catalyst]}</Badge>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(entry.created_at).toLocaleString()}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(entry.created_at).toLocaleString()}
+                  </span>
+                  <TutorButton
+                    contextType="trade"
+                    contextId={String(entry.trade_id)}
+                    label="Ask about this trade"
+                  />
+                </div>
               </div>
 
               <p className="text-sm">{entry.timeframe_rationale}</p>

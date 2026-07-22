@@ -10,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { TutorButton } from "@/components/tutor-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -93,15 +94,17 @@ function LessonAccordionBody({ lessonId, completed }: { lessonId: number; comple
   return (
     <div className="flex flex-col gap-3">
       <LessonContent markdown={lesson.content_md} />
-      <Button
-        size="sm"
-        variant={completed ? "outline" : "default"}
-        className="w-fit"
-        disabled={completeLesson.isPending}
-        onClick={() => completeLesson.mutate(lessonId)}
-      >
-        {completed ? "Completed ✓" : "Mark Complete"}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant={completed ? "outline" : "default"}
+          disabled={completeLesson.isPending}
+          onClick={() => completeLesson.mutate(lessonId)}
+        >
+          {completed ? "Completed ✓" : "Mark Complete"}
+        </Button>
+        <TutorButton contextType="lesson" contextId={String(lessonId)} label="Ask about this lesson" />
+      </div>
     </div>
   );
 }
