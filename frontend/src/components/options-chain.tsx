@@ -1,11 +1,11 @@
 "use client";
 
-import { Layers } from "lucide-react";
+import { HelpCircle, Layers } from "lucide-react";
 import { useState } from "react";
 
 import { OrderTicketDialog } from "@/components/order-ticket-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useOptionChain, useOptionExpirations } from "@/hooks/use-options-chain";
 import { cn } from "@/lib/utils";
 import type { OptionContract, OptionType } from "@/lib/types";
@@ -26,7 +27,27 @@ interface SelectedContract {
   impliedVolatility: number | null;
 }
 
-export function OptionsChain({ symbol }: { symbol: string }) {
+const COLUMN_HELP: Record<string, string> = {
+  Bid: "The highest price a buyer is currently offering — what you'd receive if you sold this contract.",
+  Ask: "The lowest price a seller is currently asking — the premium you'd pay to buy this contract.",
+  IV: "Implied volatility — the size of move the market is already pricing in before expiration. Betting bigger than this is the actual bet.",
+  Strike: "The fixed price this contract can be exercised at.",
+  Vol: "Volume — how many contracts of this exact strike/expiration have traded today.",
+  OI: "Open interest — how many contracts are currently open (bought but not yet closed or expired).",
+};
+
+function HeaderHelp({ label }: { label: keyof typeof COLUMN_HELP }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={<span className="cursor-help border-b border-dotted border-muted-foreground">{label}</span>}
+      />
+      <TooltipContent>{COLUMN_HELP[label]}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+export function OptionsChain({ symbol, underlyingPrice }: { symbol: string; underlyingPrice?: number }) {
   const { data: expirations, isPending: expirationsPending } = useOptionExpirations(symbol);
   const [selectedExpiration, setSelectedExpiration] = useState<string>();
   const [selected, setSelected] = useState<SelectedContract | null>(null);
@@ -43,9 +64,33 @@ export function OptionsChain({ symbol }: { symbol: string }) {
   return (
     <Card data-tour="symbol-options">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-1.5">
-          <Layers className="size-4" /> Options Chain
-        </CardTitle>
+        <div>
+          <CardTitle className="flex items-center gap-1.5">
+            <Layers className="size-4" /> Options Chain
+            {underlyingPrice != null && (
+              <span className="text-sm font-normal text-muted-foreground">
+                {symbol} ${underlyingPrice.toFixed(2)}
+              </span>
+            )}
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button variant="ghost" size="icon-sm" className="size-5">
+                    <HelpCircle className="size-3.5" />
+                    <span className="sr-only">What is this table?</span>
+                  </Button>
+                }
+              />
+              <TooltipContent>
+                Calls on the left, puts on the right, sorted by strike. Bold cells are in the money
+                (ITM) — the strike is already favorable relative to {symbol}&apos;s current price.
+              </TooltipContent>
+            </Tooltip>
+          </CardTitle>
+          <CardDescription>
+            Every strike and expiration, with live bid/ask — click a price to open the trade ticket.
+          </CardDescription>
+        </div>
         {expirations && expirations.length > 0 && (
           <Select
             value={expiration}
@@ -72,22 +117,28 @@ export function OptionsChain({ symbol }: { symbol: string }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead colSpan={3} className="text-center">
+                <TableHead colSpan={5} className="text-center">
                   Calls
                 </TableHead>
                 <TableHead className="text-center">Strike</TableHead>
-                <TableHead colSpan={3} className="text-center">
+                <TableHead colSpan={5} className="text-center">
                   Puts
                 </TableHead>
               </TableRow>
               <TableRow>
-                <TableHead>Bid</TableHead>
-                <TableHead>Ask</TableHead>
-                <TableHead>IV</TableHead>
-                <TableHead className="text-center">—</TableHead>
-                <TableHead>Bid</TableHead>
-                <TableHead>Ask</TableHead>
-                <TableHead>IV</TableHead>
+                <TableHead><HeaderHelp label="Bid" /></TableHead>
+                <TableHead><HeaderHelp label="Ask" /></TableHead>
+                <TableHead><HeaderHelp label="IV" /></TableHead>
+                <TableHead><HeaderHelp label="Vol" /></TableHead>
+                <TableHead><HeaderHelp label="OI" /></TableHead>
+                <TableHead className="text-center">
+                  <HeaderHelp label="Strike" />
+                </TableHead>
+                <TableHead><HeaderHelp label="Bid" /></TableHead>
+                <TableHead><HeaderHelp label="Ask" /></TableHead>
+                <TableHead><HeaderHelp label="IV" /></TableHead>
+                <TableHead><HeaderHelp label="Vol" /></TableHead>
+                <TableHead><HeaderHelp label="OI" /></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -144,7 +195,7 @@ function ContractCells({
   if (!contract) {
     return (
       <>
-        <TableCell colSpan={3} className="text-muted-foreground text-center">
+        <TableCell colSpan={5} className="text-muted-foreground text-center">
           —
         </TableCell>
       </>
@@ -168,6 +219,8 @@ function ContractCells({
       <TableCell className="text-muted-foreground">
         {contract.implied_volatility != null ? `${(contract.implied_volatility * 100).toFixed(0)}%` : "—"}
       </TableCell>
+      <TableCell className="text-muted-foreground">{contract.volume}</TableCell>
+      <TableCell className="text-muted-foreground">{contract.open_interest}</TableCell>
     </>
   );
 }

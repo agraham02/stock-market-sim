@@ -1,18 +1,20 @@
 "use client";
 
-import { CandlestickChart as CandlestickChartIcon } from "lucide-react";
+import { CandlestickChart as CandlestickChartIcon, Maximize, ZoomIn, ZoomOut } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
-import { CandlestickChart } from "@/components/candlestick-chart";
+import { CandlestickChart, type CandlestickChartHandle } from "@/components/candlestick-chart";
 import { CatalystPanel } from "@/components/catalyst-panel";
 import { LessonPrompt } from "@/components/lesson-prompt";
 import { FadeIn } from "@/components/motion/fade-in";
 import { OptionsChain } from "@/components/options-chain";
 import { PatternList } from "@/components/pattern-list";
-import { TutorButton } from "@/components/tutor-button";
+import { TutorButton, type TutorButtonHandle } from "@/components/tutor-button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSymbolChart } from "@/hooks/use-symbol-chart";
+import type { PatternHit, PatternMatch } from "@/lib/types";
 
 export default function SymbolPage() {
   const params = useParams<{ symbol: string }>();
@@ -20,6 +22,14 @@ export default function SymbolPage() {
 
   const { data, isPending, isError, error } = useSymbolChart(symbol);
   const [hoveredTime, setHoveredTime] = useState<string | null>(null);
+  const chartRef = useRef<CandlestickChartHandle>(null);
+  const tutorRef = useRef<TutorButtonHandle>(null);
+
+  function handleAskAboutPattern(hit: PatternHit, pattern: PatternMatch) {
+    tutorRef.current?.openWithDraft(
+      `Explain the ${pattern.label} pattern that fired on ${symbol} on ${hit.time} — I don't fully understand what it means or why it matters.`
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-8 max-w-6xl mx-auto w-full">
@@ -30,7 +40,7 @@ export default function SymbolPage() {
             Daily candlesticks with recognized patterns explained in plain language.
           </p>
         </div>
-        <TutorButton contextType="symbol" contextId={symbol} label={`Ask about ${symbol}`} />
+        <TutorButton ref={tutorRef} contextType="symbol" contextId={symbol} label={`Ask about ${symbol}`} />
       </FadeIn>
 
       <FadeIn delay={0.02}>
@@ -57,16 +67,40 @@ export default function SymbolPage() {
       {data && (
         <FadeIn delay={0.05} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2" data-tour="symbol-chart">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-1.5">
                 <CandlestickChartIcon className="size-4" /> Price
               </CardTitle>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon-sm" onClick={() => chartRef.current?.zoomIn()}>
+                  <ZoomIn className="size-4" />
+                  <span className="sr-only">Zoom in</span>
+                </Button>
+                <Button variant="ghost" size="icon-sm" onClick={() => chartRef.current?.zoomOut()}>
+                  <ZoomOut className="size-4" />
+                  <span className="sr-only">Zoom out</span>
+                </Button>
+                <Button variant="ghost" size="icon-sm" onClick={() => chartRef.current?.reset()}>
+                  <Maximize className="size-4" />
+                  <span className="sr-only">Reset view</span>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <CandlestickChart candles={data.candles} patterns={data.patterns} highlightedTime={hoveredTime} />
+              <CandlestickChart
+                ref={chartRef}
+                candles={data.candles}
+                patterns={data.patterns}
+                highlightedTime={hoveredTime}
+              />
             </CardContent>
           </Card>
-          <PatternList patterns={data.patterns} hoveredTime={hoveredTime} onHoverChange={setHoveredTime} />
+          <PatternList
+            patterns={data.patterns}
+            hoveredTime={hoveredTime}
+            onHoverChange={setHoveredTime}
+            onAskAboutPattern={handleAskAboutPattern}
+          />
         </FadeIn>
       )}
 
@@ -75,7 +109,7 @@ export default function SymbolPage() {
       </FadeIn>
 
       <FadeIn delay={0.15}>
-        <OptionsChain symbol={symbol} />
+        <OptionsChain symbol={symbol} underlyingPrice={data?.candles.at(-1)?.close} />
       </FadeIn>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, MessagesSquare, Send, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { toast } from "sonner";
 
 import { LessonContent } from "@/components/lesson-content";
@@ -30,6 +30,11 @@ import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { ChatContextType } from "@/lib/types";
 
+export interface TutorButtonHandle {
+  /** Opens the tutor sheet with a prefilled (editable, not auto-sent) draft message. */
+  openWithDraft: (text: string) => void;
+}
+
 interface TutorButtonProps {
   contextType: ChatContextType;
   contextId: string | null;
@@ -38,15 +43,19 @@ interface TutorButtonProps {
   variant?: "default" | "outline" | "ghost" | "secondary";
 }
 
-export function TutorButton({
-  contextType,
-  contextId,
-  label = "Ask AI Tutor",
-  size = "sm",
-  variant = "outline",
-}: TutorButtonProps) {
+export const TutorButton = forwardRef<TutorButtonHandle, TutorButtonProps>(function TutorButton(
+  { contextType, contextId, label = "Ask AI Tutor", size = "sm", variant = "outline" },
+  ref
+) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
+
+  useImperativeHandle(ref, () => ({
+    openWithDraft: (text: string) => {
+      setDraft(text);
+      setOpen(true);
+    },
+  }));
 
   const { data: history, isPending: historyPending } = useTutorHistory(contextType, contextId);
   const sendMessage = useSendTutorMessage(contextType, contextId);
@@ -149,4 +158,4 @@ export function TutorButton({
       </SheetContent>
     </Sheet>
   );
-}
+});
