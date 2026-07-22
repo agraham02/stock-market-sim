@@ -2,6 +2,7 @@
 
 import { Briefcase, PiggyBank, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
+import { CardHelp } from "@/components/card-help";
 import { LessonPrompt } from "@/components/lesson-prompt";
 import { FadeIn } from "@/components/motion/fade-in";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger-group";
@@ -33,11 +34,21 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-8 max-w-5xl mx-auto w-full">
-      <FadeIn>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Paper portfolio overview — practice the reasoning, not just the fill.
-        </p>
+      <FadeIn className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Paper portfolio overview — practice the reasoning, not just the fill.
+          </p>
+        </div>
+        <CardHelp title="About the Dashboard">
+          <ul className="flex flex-col gap-2 list-disc pl-4">
+            <li><strong className="text-foreground">Cash Balance</strong> — money not currently tied up in an open position.</li>
+            <li><strong className="text-foreground">Starting Balance</strong> — the $100,000 you began with, for comparison.</li>
+            <li><strong className="text-foreground">Total P&amp;L</strong> — cash balance plus the current mark-to-market value of every open position, minus starting balance. It moves with the market even before you close anything.</li>
+            <li><strong className="text-foreground">Open Positions</strong> — each row&apos;s P&amp;L is (mark price − entry price) × quantity × 100 (contracts control 100 shares each).</li>
+          </ul>
+        </CardHelp>
       </FadeIn>
 
       {isError && (

@@ -21,7 +21,3 @@ class ChatMessageRead(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-class TutorChatResponse(BaseModel):
-    messages: list[ChatMessageRead]

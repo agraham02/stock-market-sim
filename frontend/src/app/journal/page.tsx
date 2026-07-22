@@ -2,6 +2,7 @@
 
 import { NotebookText } from "lucide-react";
 
+import { CardHelp } from "@/components/card-help";
 import { FadeIn } from "@/components/motion/fade-in";
 import { JournalTable } from "@/components/journal-table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +25,16 @@ export default function JournalPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5">
               <NotebookText className="size-4" /> Trade Journal
+              <CardHelp title="Trade Journal">
+                <p>Every closed trade&apos;s stated thesis, graded against what actually happened on four dimensions:</p>
+                <ul className="flex flex-col gap-2 list-disc pl-4">
+                  <li><strong className="text-foreground">Direction</strong> — did the underlying move the way you predicted?</li>
+                  <li><strong className="text-foreground">Magnitude</strong> — was the move at least as big as you expected?</li>
+                  <li><strong className="text-foreground">Timing</strong> — did it happen within your stated timeframe?</li>
+                  <li><strong className="text-foreground">IV crush</strong> — even if you were right, did the drop in implied volatility after the catalyst eat the gain anyway?</li>
+                </ul>
+                <p>Grading only happens after a trade closes or expires — open positions won&apos;t show grades yet.</p>
+              </CardHelp>
             </CardTitle>
             <CardDescription>Most recent first.</CardDescription>
           </CardHeader>

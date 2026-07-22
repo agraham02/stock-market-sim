@@ -1,7 +1,8 @@
 "use client";
 
-import { CheckCircle2, GraduationCap, MapPinned } from "lucide-react";
+import { BookOpen, CheckCircle2, GraduationCap, MapPinned } from "lucide-react";
 
+import { CardHelp } from "@/components/card-help";
 import { LessonContent } from "@/components/lesson-content";
 import { LessonQuiz } from "@/components/lesson-quiz";
 import { LessonScenario } from "@/components/lesson-scenario";
@@ -52,6 +53,19 @@ export default function LearnHubPage() {
 
       <FadeIn delay={0.1}>
         <Card data-tour="learn-accordion">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-1.5">
+              <BookOpen className="size-4" /> Curriculum
+              <CardHelp title="The Curriculum">
+                <ul className="flex flex-col gap-2 list-disc pl-4">
+                  <li><strong className="text-foreground">Lessons</strong> — short, plain-language reading, surfaced right when a screen makes them relevant.</li>
+                  <li><strong className="text-foreground">Check Yourself</strong> quizzes — optional multiple-choice questions with an explanation either way. Not graded, not required to complete the lesson.</li>
+                  <li><strong className="text-foreground">What Would You Do?</strong> scenarios — a branching decision to walk through; there&apos;s no single correct path, only tradeoffs.</li>
+                  <li><strong className="text-foreground">Walk me through it</strong> — on lessons with a matching screen, this navigates there and highlights exactly what the lesson is talking about.</li>
+                </ul>
+              </CardHelp>
+            </CardTitle>
+          </CardHeader>
           <CardContent className="pt-2">
             {isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
             {isError && <p className="text-sm text-destructive">Couldn&apos;t load lessons.</p>}

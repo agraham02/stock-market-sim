@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from google import genai
 from google.genai import types
 
@@ -10,7 +12,7 @@ class GeminiTutorProvider(TutorProvider):
         self._model = model
         self._max_output_tokens = max_output_tokens
 
-    def reply(self, system_prompt: str, history: list[TutorMessage], user_message: str) -> str:
+    def reply_stream(self, system_prompt: str, history: list[TutorMessage], user_message: str) -> Iterator[str]:
         contents = [
             types.Content(
                 role="model" if turn["role"] == "assistant" else "user",
@@ -20,7 +22,7 @@ class GeminiTutorProvider(TutorProvider):
         ]
         contents.append(types.Content(role="user", parts=[types.Part(text=user_message)]))
 
-        response = self._client.models.generate_content(
+        stream = self._client.models.generate_content_stream(
             model=self._model,
             contents=contents,
             config=types.GenerateContentConfig(
@@ -29,4 +31,6 @@ class GeminiTutorProvider(TutorProvider):
                 thinking_config=types.ThinkingConfig(thinking_level="low"),
             ),
         )
-        return response.text or ""
+        for chunk in stream:
+            if chunk.text:
+                yield chunk.text

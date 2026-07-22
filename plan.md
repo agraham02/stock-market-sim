@@ -112,9 +112,10 @@ Built behind a small provider-agnostic interface (`app/services/ai_tutor/`) so s
 
 Raised during development, not yet assigned to a phase/milestone. Revisit once the core M0-M6 loop is solid and actually being used.
 
-- **Interactive onboarding walkthrough**: a first-run guided tour across Dashboard, Symbol view, Options Chain, Positions, Journal, and Learn Hub, explaining what each screen/section is for (e.g. what an options chain actually shows) before the user is dropped into it cold. This is UI orientation, distinct from the Learn Hub's lesson content, which teaches the underlying trading concepts.
-- **Learn Hub quizzes & interactive scenarios**: extend the 9 existing lessons with comprehension quizzes and "X happens — what would you do?" branching scenarios, so the curriculum tests understanding instead of only presenting it.
 - **Charting depth**: revisit whether `lightweight-charts` still fits once Phase 2 charting needs (multi-leg payoff diagrams, Greeks overlays, 0-2 DTE gamma/theta visualization) are in scope, or whether a different library/approach is warranted for those specific views. It remains a good fit for the base candlestick view.
+- **Lesson content overhaul (dedicated future feature branch)**: the Learn Hub doesn't currently define "bull run"/"bear run" terminology anywhere, and none of the 9 lessons or the 58 candlestick pattern explanations have any diagrams/reference images — everything is plain text. Raised when a user noted real confusion despite reading the existing text explanations. Deliberately deferred rather than built opportunistically — the user wants a focused pass on lesson content quality/depth on its own branch rather than folding it into unrelated feature work.
+
+**Done, formerly listed here**: interactive onboarding walkthrough, Learn Hub quizzes, and branching "what would you do" scenarios were all shipped (see `HANDOFF.md` for details) — an onboarding tour engine (driver.js-based) now also powers per-lesson interactive screen walkthroughs.
 
 ## The Decision Framework (core mechanic)
 

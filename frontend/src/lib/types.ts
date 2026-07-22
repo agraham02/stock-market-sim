@@ -223,7 +223,3 @@ export interface TutorChatMessage {
   context_id: string | null;
   timestamp: string;
 }
-
-export interface TutorChatResponse {
-  messages: TutorChatMessage[];
-}

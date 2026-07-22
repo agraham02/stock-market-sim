@@ -3,6 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { CalendarClock, Loader2, Newspaper, RefreshCw } from "lucide-react";
 
+import { CardHelp } from "@/components/card-help";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,15 @@ export function CatalystPanel({ symbol }: { symbol: string }) {
         <div>
           <CardTitle className="flex items-center gap-1.5">
             <Newspaper className="size-4" /> Catalysts & News
+            <CardHelp title="Catalysts & News">
+              <p>Real-world information to ground your trade thesis in, instead of a guess.</p>
+              <ul className="flex flex-col gap-2 list-disc pl-4">
+                <li><strong className="text-foreground">Headlines</strong> — recent news for this symbol, pulled from Finnhub, most recent first.</li>
+                <li><strong className="text-foreground">Earnings badge</strong> — the next scheduled earnings date, if one is upcoming. Earnings are the single most common source of large, fast options-relevant moves.</li>
+                <li><strong className="text-foreground">Check sentiment</strong> — an on-demand pull from Alpha Vantage scoring recent articles Bearish → Bullish. Rate-limited, so it&apos;s fetched only when you click, and cached afterward.</li>
+              </ul>
+              <p>Use this to check your stated catalyst against what the news actually shows before you fill out the trade ticket.</p>
+            </CardHelp>
           </CardTitle>
           <CardDescription>Recent headlines, upcoming earnings, and on-demand sentiment.</CardDescription>
         </div>
@@ -71,7 +81,7 @@ export function CatalystPanel({ symbol }: { symbol: string }) {
         )}
 
         {data && data.news.length > 0 && (
-          <div className="flex flex-col gap-3 max-h-96 overflow-y-auto">
+          <div className="flex flex-col gap-3 max-h-96 overflow-y-auto contain-[layout]">
             {data.news.map((article) => (
               <a
                 key={article.url}

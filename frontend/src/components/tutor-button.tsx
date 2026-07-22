@@ -118,12 +118,23 @@ export const TutorButton = forwardRef<TutorButtonHandle, TutorButtonProps>(funct
                     </Message>
                   </MessageScrollerItem>
                 ))}
-                {sendMessage.isPending && (
+                {sendMessage.isPending && !sendMessage.streamingText && (
                   <MessageScrollerItem messageId="pending">
                     <Message align="start">
                       <MessageContent>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted rounded-lg px-3 py-2 w-fit">
                           <Loader2 className="size-3.5 animate-spin" /> Thinking…
+                        </div>
+                      </MessageContent>
+                    </Message>
+                  </MessageScrollerItem>
+                )}
+                {sendMessage.isPending && sendMessage.streamingText && (
+                  <MessageScrollerItem messageId="streaming" scrollAnchor>
+                    <Message align="start">
+                      <MessageContent>
+                        <div className="rounded-lg px-3 py-2 max-w-[85%] bg-muted text-foreground">
+                          <LessonContent markdown={sendMessage.streamingText} />
                         </div>
                       </MessageContent>
                     </Message>

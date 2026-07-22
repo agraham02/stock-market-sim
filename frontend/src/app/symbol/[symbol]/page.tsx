@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { CandlestickChart, type CandlestickChartHandle } from "@/components/candlestick-chart";
+import { CardHelp } from "@/components/card-help";
 import { CatalystPanel } from "@/components/catalyst-panel";
 import { LessonPrompt } from "@/components/lesson-prompt";
 import { FadeIn } from "@/components/motion/fade-in";
@@ -70,6 +71,15 @@ export default function SymbolPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-1.5">
                 <CandlestickChartIcon className="size-4" /> Price
+                <CardHelp title="Reading This Chart">
+                  <ul className="flex flex-col gap-2 list-disc pl-4">
+                    <li><strong className="text-foreground">Candles</strong> — one per day: the thick body spans open→close (green if close is higher, red if lower), the thin wicks show the day&apos;s high and low.</li>
+                    <li><strong className="text-foreground">The faded bars along the bottom are volume</strong> — how many shares traded that day, colored to match that day&apos;s candle. Taller means more shares changed hands.</li>
+                    <li><strong className="text-foreground">Arrows above/below candles</strong> — detected candlestick patterns (green up = bullish, red down = bearish, blue = whichever one you&apos;re hovering in the list on the right). Hover an arrow for details.</li>
+                    <li><strong className="text-foreground">Dotted horizontal line</strong> — the most recent closing price.</li>
+                    <li><strong className="text-foreground">Zoom/reset buttons</strong> (top right) — or just scroll to zoom and drag to pan.</li>
+                  </ul>
+                </CardHelp>
               </CardTitle>
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="icon-sm" onClick={() => chartRef.current?.zoomIn()}>
