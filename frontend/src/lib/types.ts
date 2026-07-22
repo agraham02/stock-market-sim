@@ -127,6 +127,56 @@ export interface LessonDetail extends Lesson {
   content_md: string;
 }
 
+export interface NewsArticle {
+  headline: string;
+  summary: string;
+  source: string;
+  url: string;
+  datetime: string;
+  image: string | null;
+}
+
+export interface EarningsEvent {
+  date: string;
+  hour: string | null;
+  eps_estimate: number | null;
+  eps_actual: number | null;
+  revenue_estimate: number | null;
+  revenue_actual: number | null;
+}
+
+export interface CatalystPanel {
+  symbol: string;
+  news: NewsArticle[];
+  earnings: EarningsEvent[];
+  fetched_at: string;
+}
+
+export interface TickerSentiment {
+  relevance_score: number;
+  sentiment_score: number;
+  sentiment_label: string;
+}
+
+export interface SentimentArticle {
+  title: string;
+  url: string;
+  source: string;
+  time_published: string;
+  overall_sentiment_score: number | null;
+  overall_sentiment_label: string;
+  ticker_sentiment: TickerSentiment | null;
+}
+
+export interface SentimentResult {
+  symbol: string;
+  articles: SentimentArticle[];
+  average_sentiment_score: number | null;
+  average_sentiment_label: string | null;
+  fetched_at: string;
+  cached: boolean;
+}
+
 export type ChatContextType = "lesson" | "trade" | "symbol";
 export type ChatRole = "user" | "assistant";
 

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import { CandlestickChart } from "@/components/candlestick-chart";
+import { CatalystPanel } from "@/components/catalyst-panel";
 import { LessonPrompt } from "@/components/lesson-prompt";
 import { FadeIn } from "@/components/motion/fade-in";
 import { OptionsChain } from "@/components/options-chain";
@@ -70,6 +71,10 @@ export default function SymbolPage() {
       )}
 
       <FadeIn delay={0.1}>
+        <CatalystPanel symbol={symbol} />
+      </FadeIn>
+
+      <FadeIn delay={0.15}>
         <OptionsChain symbol={symbol} />
       </FadeIn>
     </div>
