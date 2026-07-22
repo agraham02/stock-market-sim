@@ -20,7 +20,7 @@ export default function PositionsPage() {
       </FadeIn>
 
       <FadeIn delay={0.05}>
-        <Card>
+        <Card data-tour="positions-table">
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5">
               <Briefcase className="size-4" /> All Positions

@@ -1,3 +1,5 @@
+import type { TourStep } from "@/lib/tours/types";
+
 export interface Portfolio {
   id: number;
   cash_balance: number;
@@ -123,8 +125,41 @@ export interface Lesson {
   completed_at: string | null;
 }
 
+export interface QuizChoice {
+  id: string;
+  text: string;
+  correct: boolean;
+  explanation: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  prompt: string;
+  choices: QuizChoice[];
+}
+
+export interface ScenarioChoice {
+  text: string;
+  next: string | null;
+  outcome: string | null;
+}
+
+export interface ScenarioNode {
+  prompt: string | null;
+  choices: ScenarioChoice[];
+  outcome?: string;
+}
+
+export interface Scenario {
+  start: string;
+  nodes: Record<string, ScenarioNode>;
+}
+
 export interface LessonDetail extends Lesson {
   content_md: string;
+  walkthrough_json: TourStep[] | null;
+  quiz_json: QuizQuestion[] | null;
+  scenario_json: Scenario | null;
 }
 
 export interface NewsArticle {

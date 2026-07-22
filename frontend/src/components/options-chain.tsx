@@ -41,7 +41,7 @@ export function OptionsChain({ symbol }: { symbol: string }) {
   const putsByStrike = new Map(chain?.puts.map((c) => [c.strike, c]));
 
   return (
-    <Card>
+    <Card data-tour="symbol-options">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-1.5">
           <Layers className="size-4" /> Options Chain

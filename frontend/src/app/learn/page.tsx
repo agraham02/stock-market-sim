@@ -1,8 +1,10 @@
 "use client";
 
-import { CheckCircle2, GraduationCap } from "lucide-react";
+import { CheckCircle2, GraduationCap, MapPinned } from "lucide-react";
 
 import { LessonContent } from "@/components/lesson-content";
+import { LessonQuiz } from "@/components/lesson-quiz";
+import { LessonScenario } from "@/components/lesson-scenario";
 import { FadeIn } from "@/components/motion/fade-in";
 import {
   Accordion,
@@ -15,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useCompleteLesson, useLesson, useLessons } from "@/hooks/use-lessons";
+import { useTourStore } from "@/store/tour-store";
 import type { Lesson } from "@/lib/types";
 
 export default function LearnHubPage() {
@@ -48,7 +51,7 @@ export default function LearnHubPage() {
       </FadeIn>
 
       <FadeIn delay={0.1}>
-        <Card>
+        <Card data-tour="learn-accordion">
           <CardContent className="pt-2">
             {isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
             {isError && <p className="text-sm text-destructive">Couldn&apos;t load lessons.</p>}
@@ -91,9 +94,15 @@ function LessonAccordionBody({ lessonId, completed }: { lessonId: number; comple
     return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
 
+  const hasWalkthrough = !!lesson.walkthrough_json && lesson.walkthrough_json.length > 0;
+  const hasQuiz = !!lesson.quiz_json && lesson.quiz_json.length > 0;
+  const hasScenario = !!lesson.scenario_json;
+
   return (
     <div className="flex flex-col gap-3">
       <LessonContent markdown={lesson.content_md} />
+      {hasQuiz && <LessonQuiz questions={lesson.quiz_json!} />}
+      {hasScenario && <LessonScenario scenario={lesson.scenario_json!} />}
       <div className="flex items-center gap-2">
         <Button
           size="sm"
@@ -103,6 +112,15 @@ function LessonAccordionBody({ lessonId, completed }: { lessonId: number; comple
         >
           {completed ? "Completed ✓" : "Mark Complete"}
         </Button>
+        {hasWalkthrough && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => useTourStore.getState().start(`lesson-${lessonId}`, lesson.walkthrough_json!)}
+          >
+            <MapPinned className="size-4" /> Walk me through it
+          </Button>
+        )}
         <TutorButton contextType="lesson" contextId={String(lessonId)} label="Ask about this lesson" />
       </div>
     </div>

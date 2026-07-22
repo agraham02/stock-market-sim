@@ -15,12 +15,10 @@ const item: Variants = {
 export function StaggerGroup({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  ...props
+}: React.ComponentProps<typeof motion.div>) {
   return (
-    <motion.div initial="hidden" animate="show" variants={container} className={className}>
+    <motion.div initial="hidden" animate="show" variants={container} className={className} {...props}>
       {children}
     </motion.div>
   );

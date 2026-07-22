@@ -15,7 +15,7 @@ export function PatternList({ patterns, hoveredTime, onHoverChange }: PatternLis
   const sorted = [...patterns].reverse();
 
   return (
-    <Card>
+    <Card data-tour="symbol-patterns">
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5">
           <Sparkles className="size-4" /> Detected Candlestick Patterns

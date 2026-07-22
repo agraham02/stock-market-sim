@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, GraduationCap, LayoutDashboard, LineChart, NotebookText } from "lucide-react";
+import { Briefcase, GraduationCap, HelpCircle, LayoutDashboard, LineChart, NotebookText } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,9 +8,17 @@ import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ONBOARDING_TOUR_STEPS } from "@/lib/tours/onboarding-tour";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
+import { useTourStore } from "@/store/tour-store";
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, match: (p: string) => p === "/" },
@@ -99,7 +107,7 @@ export function Nav() {
         })}
       </div>
       <form onSubmit={handleSearch} className="ml-auto flex items-center gap-2">
-        <div ref={searchContainerRef} className="relative">
+        <div ref={searchContainerRef} className="relative" data-tour="nav-search">
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -129,6 +137,23 @@ export function Nav() {
         <Button type="submit" size="sm" variant="secondary">
           Go
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" size="icon-sm">
+                <HelpCircle className="size-4" />
+                <span className="sr-only">Help</span>
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => useTourStore.getState().start("onboarding", ONBOARDING_TOUR_STEPS)}
+            >
+              <HelpCircle className="size-4" /> Take the product tour
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <ThemeToggle />
       </form>
     </nav>

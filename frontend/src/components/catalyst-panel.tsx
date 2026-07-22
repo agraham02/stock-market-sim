@@ -25,7 +25,7 @@ export function CatalystPanel({ symbol }: { symbol: string }) {
     !isPending && !isError && data?.news.length === 0 && data?.earnings.length === 0;
 
   return (
-    <Card>
+    <Card data-tour="symbol-catalysts">
       <CardHeader className="flex flex-row items-center justify-between gap-4">
         <div>
           <CardTitle className="flex items-center gap-1.5">

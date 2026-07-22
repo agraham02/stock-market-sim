@@ -20,7 +20,7 @@ export default function JournalPage() {
       </FadeIn>
 
       <FadeIn delay={0.05}>
-        <Card>
+        <Card data-tour="journal-table">
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5">
               <NotebookText className="size-4" /> Trade Journal

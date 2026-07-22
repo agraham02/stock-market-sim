@@ -1,0 +1,94 @@
+/* Restyles driver.js's default popover to match this app's shadcn/Tailwind theme tokens
+   (see frontend/src/app/globals.css) instead of its hardcoded light-mode-only defaults. */
+
+/* Note: deliberately not `all: unset` here — driver.css's base `.driver-popover` rule relies on
+   `position`/`pointer-events` (the overlay sets `pointer-events: none` on everything except the
+   popover) that `all: unset` would strip, making the popover's buttons unclickable. Only override
+   the visual properties. */
+.driver-popover {
+  font-family: var(--font-sans);
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 24px oklch(0 0 0 / 0.15);
+  min-width: 280px;
+  max-width: 320px;
+  padding: 16px;
+}
+
+.driver-popover-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--popover-foreground);
+}
+
+.driver-popover-description {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+  margin-top: 6px;
+}
+
+.driver-popover-progress-text {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.driver-popover-footer {
+  margin-top: 14px;
+}
+
+.driver-popover-footer-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background-color: transparent;
+  color: var(--popover-foreground);
+  transition: background-color 0.15s ease;
+}
+
+.driver-popover-footer-btn:hover,
+.driver-popover-footer-btn:focus-visible {
+  background-color: var(--muted);
+}
+
+.driver-popover-footer-btn.driver-popover-next-btn,
+.driver-popover-footer-btn.driver-popover-done-btn {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+.driver-popover-footer-btn.driver-popover-next-btn:hover,
+.driver-popover-footer-btn.driver-popover-done-btn:hover {
+  background-color: color-mix(in oklch, var(--primary), transparent 15%);
+}
+
+.driver-popover-close-btn {
+  color: var(--muted-foreground);
+}
+
+.driver-popover-close-btn:hover,
+.driver-popover-close-btn:focus {
+  color: var(--popover-foreground);
+}
+
+.driver-popover-arrow-side-left {
+  border-right-color: var(--popover) !important;
+}
+.driver-popover-arrow-side-right {
+  border-left-color: var(--popover) !important;
+}
+.driver-popover-arrow-side-top {
+  border-bottom-color: var(--popover) !important;
+}
+.driver-popover-arrow-side-bottom {
+  border-top-color: var(--popover) !important;
+}

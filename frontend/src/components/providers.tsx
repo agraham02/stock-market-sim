@@ -5,6 +5,8 @@ import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
+import { OnboardingPrompt } from "@/components/tour/onboarding-prompt";
+import { TourRunner } from "@/components/tour/tour-runner";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -24,6 +26,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         {children}
         <Toaster />
+        <TourRunner />
+        <OnboardingPrompt />
       </QueryClientProvider>
     </ThemeProvider>
   );

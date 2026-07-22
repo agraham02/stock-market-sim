@@ -52,7 +52,7 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      <StaggerGroup className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <StaggerGroup className="grid grid-cols-1 gap-4 sm:grid-cols-3" data-tour="dashboard-stats">
         <StaggerItem>
           <Card>
             <CardHeader>
@@ -106,7 +106,7 @@ export default function DashboardPage() {
       </FadeIn>
 
       <FadeIn delay={0.1}>
-        <Card>
+        <Card data-tour="dashboard-positions">
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5">
               <Briefcase className="size-4" /> Open Positions
